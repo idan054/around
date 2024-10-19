@@ -1,46 +1,32 @@
-import 'package:around/common/constants.dart';
-import 'package:around/common/widget_ext.dart';
-import 'package:around/pages/home_page.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+
+import 'package:around/util/ext/widget_ext.dart';
+import 'package:around/util/mixpanel_util.dart';
+import 'package:around/views/home_view/home_view.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-
-import 'package:path_provider/path_provider.dart';
-import 'common/database.dart';
-import 'firebase_options.dart';
-
-import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
-
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-
-// import 'package:intl/date_symbol_data_file.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:mixpanel_flutter/mixpanel_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'config/constants.dart';
+import 'config/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // FirebaseAnalytics.instance.logAppOpen();
-  mixpanel =
+  MixPanelUtil.mixpanel =
       await Mixpanel.init('5def6b5a71bef4c9d148132ff4bcead2', trackAutomaticEvents: true);
 
-  // path_provider no need on web
   if (!kIsWeb) {
     final dbDir = await getApplicationDocumentsDirectory();
     Hive.init(dbDir.path);
   }
+
   await Hive.openBox('uniBox');
   await initializeDateFormatting('he_IL', null);
-  print('kIsWeb: $kIsWeb kDebugMode: $kDebugMode');
-  // if (kDebugMode) await Hive.box('uniBox').clear();
-  printTrackEvent(kDebugMode ? 'Debug Session start' : 'Live Session start');
+  MixPanelUtil.printTrackEvent(kDebugMode ? 'Debug Session start' : 'Live Session start');
+
   runApp(const MyApp());
 }
 
@@ -76,4 +62,4 @@ Widget get materialApp => MaterialApp(
     theme: ThemeData(
       primarySwatch: Colors.purple,
     ),
-    home: const MyHomePage());
+    home: const HomeView());
